@@ -5,13 +5,18 @@ import (
 	"os"
 )
 
+func processScriptFile() {
+
+}
+
 func main() {
-	script_file := "script.txt"
-	if (len(os.Args) == 2){
-		script_file = os.Args[1]
+	if len(os.Args) == 1 {
+		fmt.Printf("Usage: bash generate_website.sh <script filename>")
+		os.Exit(0)
 	}
 
-	content, err := os.ReadFile(script_file)
+	scriptFile := os.Args[1]
+	content, err := os.ReadFile(scriptFile)
 	if err != nil {
 		fmt.Printf("Missing script.txt file.\n")
 		os.Exit(0)

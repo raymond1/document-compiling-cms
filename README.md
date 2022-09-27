@@ -1,75 +1,54 @@
 # Usage
-This is a console run php script and is activated using the following command:
+This is a console run script meant for generating websites. It is activated using the following command:
 
-php generate_website.php <optional script_file>
+bash generate_website.sh <command file>
 
-If no script file is specified, it is assumed by default to be "script.txt" from the current directory.
+This command is referred to as the "action script" in the documentation. The action script is capabile of copying files, generating directories and piecing together files from a combination of templates and template insertion snippets.
 
-See below for information on how to configure the Document Compiling CMS (abbreviated DCC), the format of the script file and files needed to control the behaviour of generate_website.php.
-
-# Capabilities
-This is a program that generates a website. It is capable of doing the following things:
-
-1)Generating the directory structure of a website
-2)Copying files from one location to another
-3)Generating multiple files based off of a template and individual fragments of data.
+See below for information on how to configure the Document Compiling CMS (abbreviated DCC), the format of the action script file and files needed to control its behaviour.
 
 # Installation
+<not yet written>
+# Operation
 
-This software is supposed to be installed using composer. To install the software, you can try to do the following:
+When the action script is run, using the syntax
 
-1)In the composer.json file, add the following repository:
+basy generate_website.sh <command file>
 
-        "repositories":[{
-                        "type": "vcs",
-                        "url": "git@github.com:raymond1/Document-Compiling-CMS.git"
-        }]
-    
-2)From the command line, type the following command:
+the command file is opened up and each line is parsed to look for commands. These commands are executed to perform a combination of generating directories, copying files and compiling templates and template snippets into output files.
 
-composer require raymond1/document-compiling-cms
+Details for the commands are given in the sections below.
 
-3)Copy the file generate_website.php into the base of the folder where you are going to put the files used to create your website.
+## Creating a command file/Command file syntax
+The command file contains one command per line. The possible commands each have a different syntax, which is described in the sections below.
 
+## "generate directories" command
 
-## Creating a script file/Script file syntax
+Description:
 
-Add the file script.txt needs to be placed in the working directory. It contains the set of instructions that will be performed by the cms.
+This command is used to generate directories to ensure a directory structure is in place.
 
-Example file:
-generate directories
-copy files
+Syntax:
 
-Explanation:
-The format of the script.txt file consists of lines of instructions, with one instruction per line. Each line contains what are called "directives", which are key words or phrases that have special meaning for the CMS.
+This command takes no parameters and is triggered by the following string:
 
-"generate directories" and "copy files" in the above example file are known as directives. The complete list of available directives and their usage are indicated below.
+```generate directories```
 
-## Script file directives
+Details:
 
-## "generate directories" directive
+When the php generate_website.php script is run, the generate directories command will open and read the file directories.txt in the same directory where the action script is located, called the script home directory. You will need to create this file if it doesn't exist.
 
-Usage:
+Inside of the directories.txt file will be a series of directories, one per line.
 
-In the script.txt file, add a line that contains only the following text:
-
-generate directories
-
-When the php generate_website.php script is run, the generate directories directive will do the following:
-1)open and read the file directories.txt. You will need to create this file if it doesn't exist.
-2)generate the directories listed in the directories.txt file.
-
-The syntax for specifying the directories to be created is as follows: each line contains a series of directory names separated by slashes. These directories will be created when the "generate directories" directive is processed.
-
-An example directories.txt file might contain the following:
+An example directories.txt is described below:
 
 output/example
 output/example/images
 example2
 
-This will generate the folders output, containing a subfolder example, containing a subfolder images. It will also generate the folder example2. All folders are relative to the working directory.
+Here, each line represents a directory name. If a directory does not already exist, it will be created. If a directory already exists, it will not be recreated.
 
-If a directory already exists, it will not be recreated. If a directory already exists and is not empty, the directory will not be wiped clean due to the generate directories directive.
+The first line will generate the directory "output", containing a subdirectory named "example". The second line will add the subdirectory images to the previous example directory. The third line will create the directory example2 in the script home directory.
 
 ## "copy files" directive
 
