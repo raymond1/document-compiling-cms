@@ -1,5 +1,6 @@
 <?php
-
+//Version 1.2.5
+//Please update version for each update.
 
 /*
 Debugging function
@@ -35,6 +36,7 @@ function processCommandFile($filename){
       exec($line);
     }
   }
+  echo "Command file processed.\n";
 }
 
 //Syntax of copy.txt file is:
@@ -271,19 +273,21 @@ function processTemplate($template, $outputFilename){
 
 //Opens up the template file. Assumes that there is only one <%%> tag. Replaces that tag's contents with the contents from contentFile. Writes to the file
 //outputFile.
-function process_compile_directive($templateFilename,$contentFilename,$outputFilename){
+function process_compile_directive($templateFilename,$contentFilenames,$outputFilename){
   $templateContents = file_get_contents($templateFilename);
 
-  //Find the <%%> string
-  $templateTagInfo = findTemplateTag($templateContents);
-  $openingTagLocation = $templateTagInfo[0];
-  $afterClosingTagLocation = $openingTagLocation + $templateTagInfo[1];
+  for ($i = 0; $i < count($contentFilenames); $i++){
+    $contentFilename = $contentFilenames[$i];
+    $templateTagInfo = findTemplateTag($templateContents);
+    $openingTagLocation = $templateTagInfo[0];
+    $afterClosingTagLocation = $openingTagLocation + $templateTagInfo[1];
 
-  $contentFileContents = file_get_contents($contentFilename);
+    $contentFileContents = file_get_contents($contentFilename);
+    $templateContents = substr($templateContents,0, $templateTagInfo[0]) . $contentFileContents . substr($templateContents,$afterClosingTagLocation);
+  }
 
-  $newContents = substr($templateContents,0, $templateTagInfo[0]) . $contentFileContents . substr($templateContents,$afterClosingTagLocation);
   $outputFileHandle = fopen($outputFilename, 'w+');
-  fwrite($outputFileHandle, $newContents);
+  fwrite($outputFileHandle, $templateContents);
   fclose($outputFileHandle);
 }
 
@@ -319,14 +323,17 @@ function process_script_file(){
       try{
         $tokens = explode(" ", $line);
         $number_of_tokens = count($tokens);
-        if ($number_of_tokens != 4){
-          throw new Exception("$number_of_tokens tokens were provided to the compile directive. 4 expected.");
+        if ($number_of_tokens < 3){
+          throw new Exception("$number_of_tokens tokens were provided to the compile directive. At least 3 tokens are expected. compile <template> [content1, content2, ...] <output filename>");
         }
-        $templateFile = $tokens[1];
-        $contentFile = $tokens[2];
-        $outputFile = $tokens[3];
 
-        process_compile_directive($templateFile,$contentFile,$outputFile);
+        $compileKeyword = $tokens[0];
+
+        $templateFile = $tokens[1];
+        $contentFiles = array_slice($tokens,2, $number_of_tokens - 3);
+        $outputFile = $tokens[$number_of_tokens - 1];
+
+        process_compile_directive($templateFile,$contentFiles,$outputFile);
       }
       catch(Exception $e){
         echo ("Error processing compiled documents file:" . $e->getMessage() . "\n");
@@ -337,14 +344,14 @@ function process_script_file(){
         $tokens = explode(" ", $line);
         $command_file = $tokens[1];
 
-        echo("Running commands in $command_file.");
+        echo("Running commands in $command_file.\n");
         if (file_exists($command_file)){
           processCommandFile($command_file);
         }else{
           // echo "Unable to open command file: $command_file.\n";
         }
       }catch(Exception $e){
-        echo "Error processing command file";
+        echo "Error processing command file.\n";
       }
     }
     else{

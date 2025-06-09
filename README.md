@@ -58,8 +58,8 @@ In the script.txt file, add a line that contains only the following text:
 generate directories
 
 When the php generate_website.php script is run, the generate directories directive will do the following:
-1. open and read the file directories.txt. You will need to create this file if it doesn't exist.
-2. generate the directories listed in the directories.txt file.
+1. open and read the file named 'directories.txt'. You will need to create this file if it doesn't exist.
+2. generate the directories listed in the 'directories.txt' file.
 
 The syntax for specifying the directories to be created is as follows: each line contains a series of directory names separated by slashes. These directories will be created when the "generate directories" directive is processed.
 
@@ -98,6 +98,9 @@ The result after processing the ```copyscript copy.txt``` command from above is 
 Similary, a directory can be copied recursively into the output directory by specifying a directory. You can use nested directories such as directory1/directory2/directory3 for this purpose.
 
 ## "compile" directive
+
+For most templating purposes, the "template" directory below is better, but the "compile" directive can be used in simple cases where there is only one changing section in the template.
+
 There are many websites that contain multiple pages that are very similar to each other, where, except for the content in a certain number of limited places, the pages are the same. To generate these files, the 'compile' directive exists to allow people to specify the template, the content, and the output file inside the script.txt file.
 
 To use the 'compile directive', first modify the script.txt file. For each web page that shares the same structure, add a line with the following syntax:
@@ -132,8 +135,23 @@ transcribe
 
 %>
 
-Transcribe will print the contents of the files listed under the transcribe node to the output.
+Transcribe will print the contents of the files listed under the transcribe node to the output at the location where the directive tag was located. For example, if file A's contents are:
 
+----------------
+abcdefg<%
+
+transcribe
+ B.txt
+ C.txt
+%>hijklmnop
+---------------
+
+And the content of file B.txt is the string 'cat', and the content of C.txt is the string 'dog', then the string produced following the processing of the A.txt as a template would be the string
+
+'abcdefgcatdoghijklmnop
+'.
+
+Note: there could potentially be more than one transcribe directive in a template file.
 #### 'print' command
 
 Example:
