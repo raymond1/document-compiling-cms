@@ -48,10 +48,17 @@ function copy_files($copy_instructions_filename){
   if (file_exists($copy_instructions_filename)){
     echo ("Copying files.\n");
     $lines = explode(PHP_EOL, file_get_contents($copy_instructions_filename));
+
+    $lineNumber = 1;
     foreach ($lines as $line){
       if (trim($line)=='') continue;
 
       $parts = explode(" ", $line);
+      if (count($parts) != 2){
+        echo "Incorrect number of parameters for copy command on line $lineNumber. 2 are needed. The line was:\n";
+        echo $line;
+        continue;
+      }
       $source = $parts[0];
       $destination = $parts[1];
   
@@ -62,6 +69,7 @@ function copy_files($copy_instructions_filename){
         mkdir($destination, 0777, true);
       }
       exec("cp -R $source $destination");
+      $lineNumber++;
     }  
   }else{
     echo "Copyscript not found: $copy_instructions_filename\n";
