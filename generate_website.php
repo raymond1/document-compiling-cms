@@ -64,29 +64,11 @@ function copy_files($copy_instructions_filename){
 
       //Ensure source exists
       if (!file_exists($source)){
-        echo "Source not found for copy operation. The command was: |$line|.";
+        echo "Source not found for copy operation. The line was: |$line|. Line number: $lineNumber.";
         exit;
       }
 
-      //Case 1)Source is a directory
-      //  Does destination exist?
-      //  A) Yes
-      //      Is destination a file or a directory?
-      //        If it is a directory,
-      //         Copy everything under source into directory, recursively
-      //        If it is a file,
-      //           Option 1) Delete the file. Generate the directory, copy everything under source to directory
-      //           Option 2) Don't the delete the file. Error out.
-      //  B) No
-      //      Create a new directory with the given destination name and copy the contents of directory A into it.
-      //Case 2)Source is a file
-      // Does destination exist?
-      //  Yes
-      //    If destination is a directory, copy into directory
-      //    If file, overwrite
-      //  No
-      //    Treat the destination as a file, and copy the file to the destination
-
+      //See README for implementation logic
       if (is_dir($source)){
         if (file_exists($destination)){
           if (is_dir($destination)){
