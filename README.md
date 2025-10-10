@@ -94,11 +94,26 @@ Both the source and destination specified are relative to the working directory.
 
 For example, to copy the file snail2.jpg from the src directory into a directory named output, the following line would need to be added to copy.txt:
 
-snail2.jpg output
 
+```
+snail2.jpg output
+```
 The result after processing the ```copyscript copy.txt``` command from above is that the file snail2.jpg located in the src directory would be copied into the output directory.
 
-Similary, a directory can be copied recursively into the output directory by specifying a directory. You can use nested directories such as directory1/directory2/directory3 for this purpose.
+Both the source and the destination can be either a directory or a file. The behaviour is as follows:
+
+If source is a directory, do the following:
+  Check if the destination already exists.
+  If the destination already exists, check if the destination is a directory or a file.
+    If the destination is a file, delete the file. Generate the new destination directory and copy the items under the source directory into the newly created destination directory.
+  If the destination does not exist, create a new directory with the given destination name and copy the items under the source directory into the newly created destination directory.
+
+If the source is a file, do the following:
+  Check if the destination exists.
+  If it exists, check if it is a directory or a file.
+    If it is a directory, copy the source into the destination directory.
+    If it is a file, overwrite the file with the contents from the source file.
+  If the destination does not exist, copy the source file to the destination.
 
 ## "compile" directive
 
