@@ -1,5 +1,5 @@
 <?php
-//Version 1.2.7
+//Version 1.2.8
 //Please update version for each update.
 
 /*
@@ -319,8 +319,8 @@ function process_script_file(){
       echo ("Generating directories.\n");
       process_directories();
     }else if (is_copyscript_directive($line)){
-      echo ("Processing copyscript directive\n");
       $tokens = explode(" ", $line);
+      echo ("Processing copyscript directive. Filename is {$tokens[1]}. \n");
       copy_files($tokens[1]);
     }else if (is_template_directive($line)){
       $tokens = explode(" ", $line);
