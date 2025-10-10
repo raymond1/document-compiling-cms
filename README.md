@@ -1,9 +1,9 @@
 # Usage Overview
-This is a console run php script and is activated using the following command:
+This is a console run php script that takes in 0 or 1 parameter and is activated using the following command:
 
-php generate_website.php <optional script_file>
+php generate_website.php <optional script file filename>
 
-If no script file is specified, it is assumed by default to be "script.txt" from the current directory.
+If no optional script file is specified, it is assumed by default to be "script.txt" from the current directory. In the documentation, "script file" refers to either the script.txt file, or the file specified in the command line to execute the generate_website.php script.
 
 See below for information on how to configure the Document Compiling CMS (abbreviated DCC), the format of the script file and files needed to control the behaviour of generate_website.php.
 
@@ -34,7 +34,7 @@ composer require raymond1/document-compiling-cms
 3)Copy the file generate_website.php into the base of the folder where you are going to put the files used to create your website.
 
 
-# Creating a script file/Script file syntax
+# Creating a script file, script file syntax
 
 The file script.txt needs to be created and placed in the working directory. If it is not there, you need to add it. It contains the set of instructions that will be performed by the cms.
 
@@ -48,6 +48,9 @@ The format of the script.txt file consists of lines of instructions, with one in
 "generate directories" and "copyscript" in the above example file are known as directives. The complete list of available directives and their usage are indicated below.
 
 # Script file directives
+
+## Comments
+Use the # symbol at the beginning of a line in the script file in order to ignore the rest of the line.
 
 ## "generate directories" directive
 

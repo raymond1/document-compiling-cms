@@ -1,5 +1,5 @@
 <?php
-//Version 1.2.5
+//Version 1.2.7
 //Please update version for each update.
 
 /*
@@ -312,8 +312,8 @@ function process_script_file(){
   for($i = 0; $i < count($lines); $i++){
     $line = $lines[$i];
 
-    if (trim($line) == ''){
-      continue; //ignore whitespace-only lines
+    if (trim($line) == ''||substr($line,0,1) == '#'){
+      continue; //ignore whitespace-only lines or lines that start with a comment character
     }
     else if ($line == 'generate directories'){
       echo ("Generating directories.\n");
@@ -347,7 +347,7 @@ function process_script_file(){
         echo ("Error processing compiled documents file:" . $e->getMessage() . "\n");
       }
     }else if (is_execute_directive($line)){
-      echo ("Executing scripts\n");
+      echo ("Executing execute directive\n");
       try {
         $tokens = explode(" ", $line);
         $command_file = $tokens[1];
@@ -356,7 +356,8 @@ function process_script_file(){
         if (file_exists($command_file)){
           processCommandFile($command_file);
         }else{
-          // echo "Unable to open command file: $command_file.\n";
+          echo "Command file not found: $command_file. Further processing aborted. \n";
+          exit;
         }
       }catch(Exception $e){
         echo "Error processing command file.\n";
