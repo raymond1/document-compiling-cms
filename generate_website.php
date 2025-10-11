@@ -39,6 +39,11 @@ function processCommandFile($filename){
   echo "Command file processed.\n";
 }
 
+
+//This design has the drawback that running the code twice may generate
+//different results due to new directories existing. When the code
+//detects directories, it can potentially take a different path than before.
+
 //Syntax of copy.txt file is:
 //source destination
 
@@ -46,7 +51,7 @@ function processCommandFile($filename){
 //destination refers to a directory where source will be copied to
 function copy_files($copy_instructions_filename){
   if (file_exists($copy_instructions_filename)){
-    echo ("Copying files.\n");
+    echo ("Processing $copy_instructions_filename. Copying files.\n");
     $lines = explode(PHP_EOL, file_get_contents($copy_instructions_filename));
 
     $lineNumber = 1;
@@ -61,6 +66,9 @@ function copy_files($copy_instructions_filename){
       }
       $source = $parts[0];
       $destination = $parts[1];
+
+      $destinationPathInfo = pathinfo($destination);
+      $destinationDirectory = $destinationPathInfo['dirname'];
 
       //Ensure source exists
       if (!file_exists($source)){
@@ -79,10 +87,12 @@ function copy_files($copy_instructions_filename){
           }
         }
         else{
-          mkdir($destination, 0777, true);
-          exec("cp -R $source/* $destination/");
+          if (!file_exists($destinationDirectory)){
+            mkdir($destinationDirectory, 0777, true);
+          }
+          exec("cp -R $source/* $destinationDirectory/");
         }
-      }else{
+      }else{//Source is a file
         if (file_exists($destination)){
           if (is_dir($destination)){
             exec("cp $source $destination");
@@ -90,9 +100,10 @@ function copy_files($copy_instructions_filename){
             exec("cp $source $destination");
           }
         }else{
-          $pathInfo = pathinfo($destination);
-          $directory = $pathInfo[0];
-          mkdir($directory, 0777, true);
+          //Make all directories leading up to the destination file if necessary
+          if (!file_exists($destinationDirectory)){
+            mkdir($destinationDirectory, 0777, true);
+          }
           exec("cp $source $destination");
         }
       }
