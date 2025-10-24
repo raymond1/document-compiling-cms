@@ -1,5 +1,5 @@
 <?php
-//Version 1.2.9
+//Version 1.2.10
 //Please update version for each update.
 
 /*
@@ -29,13 +29,8 @@ function is_execute_directive($s){
 
 //Executes the commands inside $filename, which is the path to the command file.
 function processCommandFile($filename){
-  $lines = file($filename, FILE_IGNORE_NEW_LINES);
+  exec(file_get_contents($filename));
 
-  foreach ($lines as $line) {
-    if (trim($line) != ''){
-      exec($line);
-    }
-  }
   echo "Command file processed.\n";
 }
 
