@@ -1,5 +1,5 @@
 <?php
-//Version 1.2.10
+//Version 1.2.11
 //Please update version for each update.
 
 /*
@@ -11,12 +11,38 @@ function d_log($s){
   fclose($file);
 }
 
-$GLOBALS['script file'] = 'script.txt';
-if ($argc == 2) $GLOBALS['script file'] = $argv[1];
+function is_absolute_path($path){
+  return substr($path,0,1) == "/";
+}
 
-$GLOBALS['output directory'] = 'output';
-$GLOBALS['source directory'] = 'src';
-$GLOBALS['directory structure file'] = $GLOBALS['source directory'] . "/" . 'directories.txt';
+/**
+ * argv
+ *     [0] => .../generate_website.php
+*    [1] => scriptfile
+*    [2] => working directory
+ */
+
+//Default value of script file
+$GLOBALS['script file'] = 'script.txt';
+//Set default value of working directory
+$GLOBALS['wd'] = getcwd();
+
+print_r($argv);
+print $GLOBALS['wd'];
+if ($argc > 1) {
+  //php generate_website.php <scriptfile>
+  $GLOBALS['script file'] = $argv[1];
+}
+
+if ($argc == 3){
+  //wd is the directory that all other directories will be relative to during processing.
+  $GLOBALS['wd'] = $argv[2];
+}
+
+if ($argc > 3){
+  print "Too many arguments. Usage: php generate_website.php <scriptfile> <wd>";
+  exit;
+}
 
 function is_execute_directive($s){
   $tokens = explode(" ", $s);
@@ -60,14 +86,21 @@ function copy_files($copy_instructions_filename){
         continue;
       }
       $source = $parts[0];
+      if (!is_absolute_path($source)){
+        $source = $GLOBALS['wd'] . '/' . $source;
+      }
+
       $destination = $parts[1];
+      if (!is_absolute_path($destination)){
+        $destination = $GLOBALS['wd']. '/' . $destination;
+      }
 
       $destinationPathInfo = pathinfo($destination);
       $destinationDirectory = $destinationPathInfo['dirname'];
 
       //Ensure source exists
       if (!file_exists($source)){
-        echo "Source not found for copy operation. The line was: |$line|. Line number: $lineNumber.";
+        echo "Source '$source' not found for copy operation. The line was: |$line|. Line number: $lineNumber.";
         exit;
       }
 
@@ -109,9 +142,9 @@ function copy_files($copy_instructions_filename){
   }
 }
 
-//Opens up the directories.txt file and generates the directories listed in that file.
-//The format of the directories.txt file is as follows:
-//Every line contains the name of a directory or a / separated list of directories.
+//Opens up the file indicated by the filename $directoryscript and generates the directories listed in that file.
+//The format of the directoryscript file is as follows:
+//Every line contains the name of a directory
 //For example:
 //
 //cat
@@ -121,10 +154,9 @@ function copy_files($copy_instructions_filename){
 //
 //For each line in the file that contains a list of directories, those directories will be created if they did not previously exist.
 //If the directories already exist, nothing is done.
-function process_directories(){
-  $directories_file = "directories.txt";
-  if (file_exists($directories_file)){
-    $contents = file_get_contents($directories_file);
+function process_directories($directoryscript){
+  if (file_exists($directoryscript)){
+    $contents = file_get_contents($directoryscript);
     $lines = explode("\n", $contents);
     foreach ($lines as $line){
       if (!empty($line)){
@@ -132,7 +164,7 @@ function process_directories(){
       }
     }
   }else{
-    echo("Missing directories.txt file.\n");
+    echo("Directoryscript $directoryscript not found. \n");
   }
 }
 
@@ -161,6 +193,16 @@ function getFirstDirectiveLocation($s){
   $returnObject->start = $openingTagStart + 2;
   $returnObject->length = $closingTagStart - ($openingTagStart + 2);
   return $returnObject;
+}
+
+//directoryscript <filename>
+function is_directoryscript_directive($s){
+  $tokens = explode(" ", $s);
+
+  if (count($tokens) != 2) return false; 
+  if ($tokens[0]!='directoryscript') return false;
+  
+  return true;
 }
 
 //copyscript <filename>
@@ -332,7 +374,7 @@ function process_compile_directive($templateFilename,$contentFilenames,$outputFi
   fclose($outputFileHandle);
 }
 
-//parses the script.txt file and executes the commands within it
+//parses the script file and executes the commands within it
 function process_script_file(){
   $script_file_contents = @file_get_contents($GLOBALS['script file']);
   if ($script_file_contents === false){
@@ -344,31 +386,26 @@ function process_script_file(){
   $lines = explode("\n", $script_file_contents);
   for($i = 0; $i < count($lines); $i++){
     $line = $lines[$i];
+    $tokens = explode(" ", $line);
 
     if (trim($line) == ''||substr($line,0,1) == '#'){
       continue; //ignore whitespace-only lines or lines that start with a comment character
     }
-    else if ($line == 'generate directories'){
+    else if (is_directoryscript_directive($line)){
       echo ("Generating directories.\n");
-      process_directories();
+      process_directories($tokens[1]);
     }else if (is_copyscript_directive($line)){
-      $tokens = explode(" ", $line);
       echo ("Processing copyscript directive. Filename is {$tokens[1]}. \n");
       copy_files($tokens[1]);
     }else if (is_template_directive($line)){
-      $tokens = explode(" ", $line);
-      
       processTemplate($tokens[1], $tokens[2]);
     }
     else if (is_compile_directive($line)){
       try{
-        $tokens = explode(" ", $line);
         $number_of_tokens = count($tokens);
         if ($number_of_tokens < 3){
           throw new Exception("$number_of_tokens tokens were provided to the compile directive. At least 3 tokens are expected. compile <template> [content1, content2, ...] <output filename>");
         }
-
-        $compileKeyword = $tokens[0];
 
         $templateFile = $tokens[1];
         $contentFiles = array_slice($tokens,2, $number_of_tokens - 3);
@@ -382,7 +419,6 @@ function process_script_file(){
     }else if (is_execute_directive($line)){
       echo ("Executing execute directive\n");
       try {
-        $tokens = explode(" ", $line);
         $command_file = $tokens[1];
 
         echo("Running commands in $command_file.\n");

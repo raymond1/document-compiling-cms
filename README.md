@@ -39,40 +39,42 @@ composer require raymond1/document-compiling-cms
 The file script.txt needs to be created and placed in the working directory. If it is not there, you need to add it. It contains the set of instructions that will be performed by the cms.
 
 Example file:
-generate directories
+directoryscript
 copyscript copy.txt
 
 Explanation:
 The format of the script.txt file consists of lines of instructions, with one instruction per line. Each line contains what are called "directives", which are key words or phrases that have special meaning for the CMS.
 
-"generate directories" and "copyscript" in the above example file are known as directives. The complete list of available directives and their usage are indicated below.
+"directoryscript" and "copyscript" in the above example file are known as directives. The complete list of available directives and their usage are indicated below.
 
 # Script file directives
 
 ## Comments
 Use the # symbol at the beginning of a line in the script file in order to ignore the rest of the line.
 
-## "generate directories" directive
+## "directoryscript" directive
 
 Usage:
 
-In the script.txt file, add a line that contains only the following text:
+Inside the main script file, add the following code:
 
-generate directories
+```
+directoryscript <directoryscript filename>
+```
 
-When the php generate_website.php script is run, the generate directories directive will do the following:
-1. open and read the file named 'directories.txt'. You will need to create this file if it doesn't exist.
-2. generate the directories listed in the 'directories.txt' file.
-
-The syntax for specifying the directories to be created is as follows: each line contains a series of directory names separated by slashes. These directories will be created when the "generate directories" directive is processed.
+The directoryscript directive will do the following:
+1. open and read the file specified.
+2. generate the directories listed specified as a parameter in the directoryscript directive line.
 
 An example directories.txt file might contain the following:
 
+```
 output/example
 output/example/images
 example2
+```
 
-This will generate the folders output, containing a subfolder example, containing a subfolder images. It will also generate the folder example2. All folders are relative to the working directory.
+This will generate the folders output, output/example, output/example/images and example2.
 
 ## "copyscript" directive
 
@@ -101,12 +103,13 @@ snail2.jpg output
 The result after processing the ```copyscript copy.txt``` command from above is that the file snail2.jpg located in the src directory would be copied into the output directory.
 
 Both the source and the destination can be either a directory or a file. The behaviour is as follows:
-
+```
 If source is a directory, do the following:
   Check if the destination already exists.
   If the destination already exists, check if the destination is a directory or a file.
     If the destination is a file, delete the file. Generate the new destination directory and copy the items under the source directory into the newly created destination directory.
-  If the destination does not exist, create a new directory with the given destination name and copy the items under the source directory into the newly created destination directory.
+    If the destination is a directory, copy the items under the source directory into the destination directory.
+  If the destination does not exist, interpret it as a directory, create it and copy the items under the source directory into the newly created destination directory.
 
 If the source is a file, do the following:
   Check if the destination exists.
@@ -114,7 +117,7 @@ If the source is a file, do the following:
     If it is a directory, copy the source into the destination directory.
     If it is a file, overwrite the file with the contents from the source file.
   If the destination does not exist, copy the source file to the destination.
-
+```
 ## "compile" directive
 
 For most templating purposes, the "template" directory below is better, but the "compile" directive can be used in simple cases where there is only one changing section in the template.
