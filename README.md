@@ -102,21 +102,7 @@ snail2.jpg output
 ```
 The result after processing the ```copyscript copy.txt``` command from above is that the file snail2.jpg located in the src directory would be copied into the output directory.
 
-Both the source and the destination can be either a directory or a file. The behaviour is as follows:
-```
-If source is a directory, do the following:
-  Check if the destination already exists.
-  If the destination already exists, check if the destination is a directory or a file.
-    If the destination is a file, delete the file. Generate the new destination directory and copy the items under the source directory into the newly created destination directory.
-    If the destination is a directory, copy the items under the source directory into the destination directory.
-  If the destination does not exist, interpret it as a directory, create it and copy the items under the source directory into the newly created destination directory.
-
-If the source is a file, do the following:
-  Check if the destination exists.
-  If it exists, check if it is a directory or a file.
-    If it is a directory, copy the source into the destination directory.
-    If it is a file, overwrite the file with the contents from the source file.
-  If the destination does not exist, copy the source file to the destination.
+Both the source and the destination can be either a directory or a file. If the source is a directory, a "cp -R -f $source/* $destination/" will be performed. If the source is a file, a "cp $source $destination" will be performed. In addition, parent directories will be created if necessary, and files will be overwritten if a file in the destination with the same name already exists.
 ```
 ## "compile" directive
 
