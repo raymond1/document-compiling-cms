@@ -1,5 +1,5 @@
 <?php
-//Version 1.2.11
+//Version 1.2.12
 //Please update version for each update.
 
 /*
@@ -9,6 +9,17 @@ function d_log($s){
   $file = fopen('log.log', 'a+');
   fwrite($file, $s);
   fclose($file);
+}
+
+//If a path is passed in that is relative, make it relative to $GLOBALS['wd']
+//Otherwise, return the absolute path
+function make_absolute($path){
+  $returnPath = $path;
+  if (!is_absolute_path($path)){
+    $returnPath = $GLOBALS['wd'] . '/' . $path;
+  }
+
+  return $returnPath;
 }
 
 function is_absolute_path($path){
@@ -27,8 +38,6 @@ $GLOBALS['script file'] = 'script.txt';
 //Set default value of working directory
 $GLOBALS['wd'] = getcwd();
 
-print_r($argv);
-print $GLOBALS['wd'];
 if ($argc > 1) {
   //php generate_website.php <scriptfile>
   $GLOBALS['script file'] = $argv[1];
@@ -78,6 +87,7 @@ function copy_files($copy_instructions_filename){
     $lineNumber = 1;
     foreach ($lines as $line){
       if (trim($line)=='') continue;
+      if (substr($line,0,1) == '#') continue; //alow for comments
 
       $parts = explode(" ", $line);
       if (count($parts) != 2){
@@ -104,37 +114,32 @@ function copy_files($copy_instructions_filename){
         exit;
       }
 
+      
       //See README for implementation logic
       if (is_dir($source)){
+        $copyCommand = "cp -R -f $source/* $destination/";
         if (file_exists($destination)){
-          if (is_dir($destination)){
-            exec("cp -R $source/* $destination/");
-          }else{
+          if (!is_dir($destination)){
             exec("rm $destination");
-            exec("cp -R $source/* $destination/");
           }
         }
         else{
-          if (!file_exists($destinationDirectory)){
-            mkdir($destinationDirectory, 0777, true);
+          if (!file_exists($destination)){
+            mkdir($destination, 0777, true);
           }
-          exec("cp -R $source/* $destinationDirectory/");
         }
       }else{//Source is a file
-        if (file_exists($destination)){
-          if (is_dir($destination)){
-            exec("cp $source $destination");
-          }else{
-            exec("cp $source $destination");
-          }
-        }else{
+        $copyCommand = "cp $source $destination";
+        if (!file_exists($destination)){
           //Make all directories leading up to the destination file if necessary
           if (!file_exists($destinationDirectory)){
             mkdir($destinationDirectory, 0777, true);
           }
-          exec("cp $source $destination");
         }
       }
+      print "$copyCommand\n";
+      exec($copyCommand);
+
       $lineNumber++;
     }  
   }else{
@@ -155,12 +160,16 @@ function copy_files($copy_instructions_filename){
 //For each line in the file that contains a list of directories, those directories will be created if they did not previously exist.
 //If the directories already exist, nothing is done.
 function process_directories($directoryscript){
+  $directoryscript = make_absolute($directoryscript);
+
   if (file_exists($directoryscript)){
     $contents = file_get_contents($directoryscript);
     $lines = explode("\n", $contents);
     foreach ($lines as $line){
-      if (!empty($line)){
-        @mkdir($line,0777,true);
+      if (!empty($line)){ //skip empty lines
+        $directoryName = make_absolute($line);
+
+        @mkdir($directoryName,0777,true);
       }
     }
   }else{
